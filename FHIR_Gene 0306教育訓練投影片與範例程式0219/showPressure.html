@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+  <title>Show</title>
+  <script src="setting.js"></script>
+  <script>
+    function getData() {
+      var apiURL = FHIRrootURL 
+                 + "/Observation?subject=" + document.getElementById("FHIRPtionID").value 
+                 + "&date=gt" + document.getElementById("start").value 
+                 + "&date=lt" + document.getElementById("end").value;
+      var HttpObj = new XMLHttpRequest();   
+      var ret;
+      HttpObj.onreadystatechange = function () {
+          if (HttpObj.readyState === 4) {
+              ret = HttpObj.responseText;
+              var k=0;
+              while(document.getElementById('Tr'+k)){
+                document.getElementById("bodyPressure").removeChild(document.getElementById('Tr'+k));
+                k++;
+              }
+              for(var i=0;i<JSON.parse(ret).entry.length;i++){
+                  tr = document.createElement('tr');
+                  tr.id="Tr"+i;
+                  for(var j=0;j<4;j++){
+                      var td = document.createElement('td');
+                      td.id = 'Td'+i+j;
+                      td.style.border="1px solid black";
+                      td.style.width="200px";
+                      tr.appendChild(td);
+                  }
+                  document.getElementById("bodyPressure").appendChild(tr);
+                  document.getElementById('Td'+i+0).innerHTML = JSON.parse(ret).entry[i].resource.id;
+                  document.getElementById('Td'+i+1).innerHTML = JSON.parse(ret).entry[i].resource.effectiveDateTime;
+                  document.getElementById('Td'+i+2).innerHTML = JSON.parse(ret).entry[i].resource.component[0].valueQuantity.value;
+                  document.getElementById('Td'+i+3).innerHTML = JSON.parse(ret).entry[i].resource.component[1].valueQuantity.value;
+              }
+          }
+      }
+      HttpObj.open("GET", apiURL, true);
+      HttpObj.send();
+    } 
+  </script>	
+</head>
+<body>
+    <p>FHIR patient id: <input type="text"  id="FHIRPtionID"/></p>
+    <p>DateTime: <input type="datetime-local" id="start" step="1"> ~ <input type="datetime-local" id="end" step="1"></p>
+    <p><input id="Button1" onclick="getData()"  type="button" value="searchData" /></p>
+    <table id="bodyPressure" style="border: 1px solid black;">
+        <tr>
+            <th align="center" style="border: 1px solid black; width:200px;">Observation Resource ID</th>
+            <th align="center" style="border: 1px solid black; width:200px;">Measure Time</th>
+            <th align="center" style="border: 1px solid black; width:200px;">Distolic blood pressure</th>
+            <th align="center" style="border: 1px solid black; width:200px;">Systolic blood pressure</th>
+        </tr>
+    </table>
+    
+</body>
+</html>
